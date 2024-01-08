@@ -33,7 +33,7 @@ fn main() {
     match args.cmd {
         Cmd::Analyse { path, format } => match format.as_str().try_into() {
             Ok(f) => match f {
-                Format::Txt => match import_text(&path) {
+                Format::Txt => match import_txt(&path) {
                     Ok(contents) => {
                         let analysed = analyzer.polarity_scores(contents.as_str());
                         println!(
@@ -74,7 +74,7 @@ impl TryFrom<&str> for Format {
     }
 }
 
-fn import_text(path: &str) -> Result<String, ErrorKind> {
+fn import_txt(path: &str) -> Result<String, ErrorKind> {
     fs::read_to_string(path).map_err(|e| ErrorKind::ReadToString(e.to_string()))
 }
 
@@ -89,22 +89,22 @@ pub enum ErrorKind {
 
 #[cfg(test)]
 mod tests {
-    use crate::import_text;
+    use crate::import_txt;
     use std::fs;
     use std::fs::File;
 
     #[test]
-    fn test_file_import_succeeds() {
+    fn test_txt_import_succeeds() {
         let file_path = "foo.txt";
         File::create(file_path).expect("Error creating file for test.");
-        let text = import_text(file_path).expect("Unable to import text in test");
+        let text = import_txt(file_path).expect("Unable to import text in test");
         fs::remove_file(file_path).expect("Unable to remove file for test.");
         assert_eq!(text, "")
     }
 
     #[test]
-    fn test_file_import_fails() {
-        let e = import_text("foo.txt").unwrap_err();
+    fn test_txt_import_fails() {
+        let e = import_txt("foo.txt").unwrap_err();
         assert_eq!(
             e.to_string(),
             "Text could not be imported: No such file or directory (os error 2)"
