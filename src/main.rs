@@ -7,7 +7,7 @@ use std::fs;
 #[derive(Parser)]
 #[command(author, version)]
 #[command(propagate_version = true)]
-/// A CLI tool to perform sentiment analysis on a provided text file
+/// A CLI tool to perform simple sentiment analysis on provided text
 struct Args {
     #[command(subcommand)]
     cmd: Cmd,
@@ -15,21 +15,21 @@ struct Args {
 
 #[derive(Subcommand)]
 enum Cmd {
-    /// Performs sentiment analysis on a provided text file
+    /// Performs sentiment analysis on provided text
     Analyse {
         #[arg(short, long)]
-        /// The file path to the provided text file
+        /// The file path to the provided text
         path: String,
 
         #[arg(short, long)]
-        /// The format of the text file
+        /// The format of the file containing the text
         format: String,
     },
 }
 
 fn main() {
-    let analyzer = vader_sentiment::SentimentIntensityAnalyzer::new();
     let args = Args::parse();
+    let analyzer = vader_sentiment::SentimentIntensityAnalyzer::new();
     match args.cmd {
         Cmd::Analyse { path, format } => match format.as_str().try_into() {
             Ok(f) => match f {
@@ -38,14 +38,14 @@ fn main() {
                         let analysed = analyzer.polarity_scores(contents.as_str());
                         println!(
                             "{0: <20} | {1: <20} | {2: <20} | {3: <20}",
-                            "compound".to_string().bright_green(),
-                            "neutral".to_string().bright_green(),
                             "positive".to_string().bright_green(),
-                            "negative".to_string().bright_green()
+                            "negative".to_string().bright_green(),
+                            "neutral".to_string().bright_green(),
+                            "compound".to_string().bright_green(),
                         );
                         println!(
                             "{0: <20} | {1: <20} | {2: <20} | {3: <20}",
-                            analysed["compound"], analysed["neu"], analysed["pos"], analysed["neg"]
+                            analysed["pos"], analysed["neg"], analysed["compound"], analysed["neu"],
                         );
                     }
                     Err(e) => {
@@ -80,7 +80,7 @@ fn import_txt(path: &str) -> Result<String, ErrorKind> {
 
 #[derive(Debug, thiserror::Error, PartialEq)]
 pub enum ErrorKind {
-    #[error("'{0}' is not a supported format.")]
+    #[error("'{0}' is not a supported file format.")]
     ConvertToFormat(String),
 
     #[error("Text could not be imported: {0}")]
