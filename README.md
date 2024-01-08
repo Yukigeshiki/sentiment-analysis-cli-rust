@@ -2,7 +2,7 @@
 
 [![build](https://github.com/Yukigeshiki/sentiment-analysis-cli-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/Yukigeshiki/sentiment-analysis-cli-rust/actions/workflows/ci.yml)
 
-A CLI tool to perform simple sentiment analysis written in Rust, using the Rust port of [VADER](https://github.com/ckw017/vader-sentiment-rust).
+A CLI tool to perform simple sentiment analysis written in Rust, using a Rust port of [VADER](https://github.com/ckw017/vader-sentiment-rust).
 
 ### How to run:
 
