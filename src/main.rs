@@ -30,13 +30,23 @@ enum Cmd {
 fn main() {
     let analyzer = vader_sentiment::SentimentIntensityAnalyzer::new();
     let args = Args::parse();
-
     match args.cmd {
         Cmd::Analyse { path, format } => match format.as_str().try_into() {
             Ok(f) => match f {
-                Format::Text => match fs::read_to_string(path) {
+                Format::Text => match import_text(path) {
                     Ok(contents) => {
-                        println!("{:#?}", analyzer.polarity_scores(contents.as_str()))
+                        let analysed = analyzer.polarity_scores(contents.as_str());
+                        println!(
+                            "{0: <20} | {1: <20} | {2: <20} | {3: <20}",
+                            "compound".to_string().bright_green(),
+                            "neutral".to_string().bright_green(),
+                            "positive".to_string().bright_green(),
+                            "negative".to_string().bright_green()
+                        );
+                        println!(
+                            "{0: <20} | {1: <20} | {2: <20} | {3: <20}",
+                            analysed["compound"], analysed["neu"], analysed["pos"], analysed["neg"]
+                        );
                     }
                     Err(e) => {
                         eprintln!("{} {e}", "error:".to_string().bright_red())
@@ -59,7 +69,6 @@ impl TryFrom<&str> for Format {
     fn try_from(format: &str) -> Result<Self, Self::Error> {
         match format.to_lowercase().as_str() {
             "text" => Ok(Self::Text),
-            "pdf" => Ok(Self::Pdf),
             other => Err(ErrorKind::ConvertToFormat(other.to_string())),
         }
     }
@@ -67,6 +76,13 @@ impl TryFrom<&str> for Format {
 
 #[derive(Debug, thiserror::Error)]
 pub enum ErrorKind {
-    #[error("'{0}' is not a supported animal.")]
+    #[error("'{0}' is not a supported format.")]
     ConvertToFormat(String),
+
+    #[error("Text could not be imported: {0}")]
+    ReadFromFile(String),
+}
+
+fn import_text(path: String) -> Result<String, ErrorKind> {
+    fs::read_to_string(path).map_err(|e| ErrorKind::ReadFromFile(e.to_string()))
 }
