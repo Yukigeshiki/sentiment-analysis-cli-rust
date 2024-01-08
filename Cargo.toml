@@ -1,5 +1,5 @@
 [package]
-name = "senti"
+name = "sentiment"
 version = "0.1.0"
 edition = "2021"
 authors = ["Laurence Sonnenberg <laurence@robothouse.io>"]

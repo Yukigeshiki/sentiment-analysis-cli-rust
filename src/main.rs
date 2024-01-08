@@ -33,7 +33,7 @@ fn main() {
     match args.cmd {
         Cmd::Analyse { path, format } => match format.as_str().try_into() {
             Ok(f) => match f {
-                Format::Text => match import_text(path) {
+                Format::Txt => match import_text(&path) {
                     Ok(contents) => {
                         let analysed = analyzer.polarity_scores(contents.as_str());
                         println!(
@@ -59,7 +59,7 @@ fn main() {
 }
 
 enum Format {
-    Text,
+    Txt,
     // other formats
 }
 
@@ -68,21 +68,46 @@ impl TryFrom<&str> for Format {
 
     fn try_from(format: &str) -> Result<Self, Self::Error> {
         match format.to_lowercase().as_str() {
-            "text" => Ok(Self::Text),
+            "txt" => Ok(Self::Txt),
             other => Err(ErrorKind::ConvertToFormat(other.to_string())),
         }
     }
 }
 
-#[derive(Debug, thiserror::Error)]
+fn import_text(path: &str) -> Result<String, ErrorKind> {
+    fs::read_to_string(path).map_err(|e| ErrorKind::ReadToString(e.to_string()))
+}
+
+#[derive(Debug, thiserror::Error, PartialEq)]
 pub enum ErrorKind {
     #[error("'{0}' is not a supported format.")]
     ConvertToFormat(String),
 
     #[error("Text could not be imported: {0}")]
-    ReadFromFile(String),
+    ReadToString(String),
 }
 
-fn import_text(path: String) -> Result<String, ErrorKind> {
-    fs::read_to_string(path).map_err(|e| ErrorKind::ReadFromFile(e.to_string()))
+#[cfg(test)]
+mod tests {
+    use crate::import_text;
+    use std::fs;
+    use std::fs::File;
+
+    #[test]
+    fn test_file_import_succeeds() {
+        let file_path = "foo.txt";
+        File::create(file_path).expect("Error creating file for test.");
+        let text = import_text(file_path).expect("Unable to import text in test");
+        fs::remove_file(file_path).expect("Unable to remove file for test.");
+        assert_eq!(text, "")
+    }
+
+    #[test]
+    fn test_file_import_fails() {
+        let e = import_text("foo.txt").unwrap_err();
+        assert_eq!(
+            e.to_string(),
+            "Text could not be imported: No such file or directory (os error 2)"
+        );
+    }
 }
