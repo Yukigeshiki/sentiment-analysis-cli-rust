@@ -18,7 +18,7 @@ enum Cmd {
     /// Performs sentiment analysis on provided text
     Analyse {
         #[arg(short, long)]
-        /// The file path to the provided text
+        /// The file path to the text
         path: String,
 
         #[arg(short, long)]
@@ -35,25 +35,25 @@ fn main() {
             Ok(f) => match f {
                 Format::Txt => match import_txt(&path) {
                     Ok(contents) => {
-                        let analysed = analyzer.polarity_scores(contents.as_str());
+                        let analysed = analyzer.polarity_scores(&contents);
                         println!(
                             "{0: <20} | {1: <20} | {2: <20} | {3: <20}",
-                            "positive".to_string().bright_green(),
-                            "negative".to_string().bright_green(),
-                            "neutral".to_string().bright_green(),
-                            "compound".to_string().bright_green(),
+                            "Positive".to_string().bright_green(),
+                            "Negative".to_string().bright_green(),
+                            "Neutral".to_string().bright_green(),
+                            "Compound".to_string().bright_green(),
                         );
                         println!(
                             "{0: <20} | {1: <20} | {2: <20} | {3: <20}",
-                            analysed["pos"], analysed["neg"], analysed["compound"], analysed["neu"],
+                            analysed["pos"], analysed["neg"], analysed["neu"], analysed["compound"],
                         );
                     }
                     Err(e) => {
-                        eprintln!("{} {e}", "error:".to_string().bright_red())
+                        eprintln!("{} {e}", "Error:".to_string().bright_red())
                     }
                 },
             },
-            Err(e) => eprintln!("{} {e}", "error:".to_string().bright_red()),
+            Err(e) => eprintln!("{} {e}", "Error:".to_string().bright_red()),
         },
     }
 }
@@ -80,10 +80,10 @@ fn import_txt(path: &str) -> Result<String, ErrorKind> {
 
 #[derive(Debug, thiserror::Error, PartialEq)]
 pub enum ErrorKind {
-    #[error("'{0}' is not a supported file format.")]
+    #[error("'{0}' is not a supported file format")]
     ConvertToFormat(String),
 
-    #[error("Text could not be imported: {0}")]
+    #[error("{0}")]
     ReadToString(String),
 }
 
@@ -96,18 +96,15 @@ mod tests {
     #[test]
     fn test_txt_import_succeeds() {
         let file_path = "foo.txt";
-        File::create(file_path).expect("Error creating file for test.");
+        File::create(file_path).expect("Error creating file for test");
         let text = import_txt(file_path).expect("Unable to import text in test");
-        fs::remove_file(file_path).expect("Unable to remove file for test.");
+        fs::remove_file(file_path).expect("Unable to remove file for test");
         assert_eq!(text, "")
     }
 
     #[test]
     fn test_txt_import_fails() {
         let e = import_txt("foo.txt").unwrap_err();
-        assert_eq!(
-            e.to_string(),
-            "Text could not be imported: No such file or directory (os error 2)"
-        );
+        assert_eq!(e.to_string(), "No such file or directory (os error 2)");
     }
 }
