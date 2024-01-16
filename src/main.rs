@@ -22,7 +22,7 @@ enum Cmd {
         path: String,
 
         #[arg(short, long)]
-        /// The format of the file containing the text
+        /// The format of the file containing the text, e.g. txt
         format: String,
     },
 }
@@ -78,7 +78,7 @@ fn import_txt(path: &str) -> Result<String, ErrorKind> {
     fs::read_to_string(path).map_err(|e| ErrorKind::ReadToString(e.to_string()))
 }
 
-#[derive(Debug, thiserror::Error, PartialEq)]
+#[derive(Debug, thiserror::Error)]
 pub enum ErrorKind {
     #[error("'{0}' is not a supported file format")]
     ConvertToFormat(String),
