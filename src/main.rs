@@ -2,6 +2,7 @@ extern crate vader_sentiment;
 
 use clap::{Parser, Subcommand};
 use colored::Colorize;
+use comfy_table::Table;
 use std::fs;
 
 #[derive(Parser)]
@@ -36,17 +37,16 @@ fn main() {
                 Format::Txt => match import_txt(&path) {
                     Ok(contents) => {
                         let analysed = analyzer.polarity_scores(&contents);
-                        println!(
-                            "{0: <20} | {1: <20} | {2: <20} | {3: <20}",
-                            "Positive".to_string().bright_green(),
-                            "Negative".to_string().bright_green(),
-                            "Neutral".to_string().bright_green(),
-                            "Compound".to_string().bright_green(),
-                        );
-                        println!(
-                            "{0: <20} | {1: <20} | {2: <20} | {3: <20}",
-                            analysed["pos"], analysed["neg"], analysed["neu"], analysed["compound"],
-                        );
+                        let mut table = Table::new();
+                        table
+                            .set_header(vec!["Positive", "Negative", "Neutral", "Compound"])
+                            .add_row(vec![
+                                analysed["pos"],
+                                analysed["neg"],
+                                analysed["neu"],
+                                analysed["compound"],
+                            ]);
+                        println!("{table}");
                     }
                     Err(e) => {
                         eprintln!("{} {e}", "Error:".to_string().bright_red())
