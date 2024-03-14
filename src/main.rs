@@ -2,7 +2,7 @@ extern crate vader_sentiment;
 
 use clap::{Parser, Subcommand};
 use colored::Colorize;
-use comfy_table::Table;
+use comfy_table::{Cell, Color, Table};
 use std::fs;
 
 #[derive(Parser)]
@@ -39,7 +39,12 @@ fn main() {
                         let analysed = analyzer.polarity_scores(&contents);
                         let mut table = Table::new();
                         table
-                            .set_header(vec!["Positive", "Negative", "Neutral", "Compound"])
+                            .set_header(vec![
+                                Cell::new("Positive").fg(Color::Green),
+                                Cell::new("Negative").fg(Color::Green),
+                                Cell::new("Neutral").fg(Color::Green),
+                                Cell::new("Compound").fg(Color::Green),
+                            ])
                             .add_row(vec![
                                 analysed["pos"],
                                 analysed["neg"],
