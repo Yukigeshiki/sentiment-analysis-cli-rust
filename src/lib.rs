@@ -27,7 +27,7 @@ pub enum ErrorKind {
     #[error("Error decoding HTML. {0}")]
     Decode(String),
 
-    #[error("Error fetching file from file system. {0}")]
+    #[error("Error importing file from file system. {0}")]
     ReadToString(String),
 
     #[error("Error parsing HTML. {0}")]
@@ -58,7 +58,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_html_fails() {
+    fn test_parse_html_is_failure() {
         let html = r#"
                 <html>
                     <body>
@@ -77,7 +77,7 @@ mod tests {
     }
 
     #[test]
-    fn test_import_from_file_path_is_succeeds() {
+    fn test_import_from_file_path_is_success() {
         let file_path = "foo.txt";
         File::create(file_path).expect("Error creating file for test");
         let text = import_from_file_path(file_path).expect("Unable to import text in test");
@@ -86,11 +86,11 @@ mod tests {
     }
 
     #[test]
-    fn test_import_from_file_path_fails() {
+    fn test_import_from_file_path_is_failure() {
         let e = import_from_file_path("foo.txt").unwrap_err();
         assert_eq!(
             e.to_string(),
-            "Error fetching file from file system. No such file or directory (os error 2)"
+            "Error importing file from file system. No such file or directory (os error 2)"
         );
     }
 }
