@@ -73,10 +73,45 @@ mod tests {
     use std::fs;
     use std::fs::File;
 
-    use crate::import_from_file_path;
+    use crate::{import_from_file_path, parse_html};
 
     #[test]
-    fn test_txt_import_succeeds() {
+    fn test_parse_html_is_success() {
+        let html = r#"
+                <html>
+                    <body>
+                        <div id="example">
+                            <p>Hello, world!</p>
+                        </div>
+                    </body>
+                </html>
+            "#;
+        let selector = "div#example p";
+        let text = parse_html(html, selector).expect("Unable to parse HTML");
+        assert_eq!(text, "Hello, world!")
+    }
+
+    #[test]
+    fn test_parse_html_fails() {
+        let html = r#"
+                <html>
+                    <body>
+                        <div id="example">
+                            <p>Hello, world!</p>
+                        </div>
+                    </body>
+                </html>
+            "#;
+        let selector = "div#example a";
+        let e = parse_html(html, selector).unwrap_err();
+        assert_eq!(
+            e.to_string(),
+            "Error parsing HTML. No text available at selector"
+        )
+    }
+
+    #[test]
+    fn test_import_from_file_path_is_succeeds() {
         let file_path = "foo.txt";
         File::create(file_path).expect("Error creating file for test");
         let text = import_from_file_path(file_path).expect("Unable to import text in test");
@@ -85,7 +120,7 @@ mod tests {
     }
 
     #[test]
-    fn test_txt_import_fails() {
+    fn test_import_from_file_path_fails() {
         let e = import_from_file_path("foo.txt").unwrap_err();
         assert_eq!(
             e.to_string(),
