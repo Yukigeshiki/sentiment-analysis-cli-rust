@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 
-use crate::{import_from_file_path, parse_html, ErrorKind};
+use crate::{extract_text_from_html, import_file_from_path, ErrorKind};
 
 #[derive(Parser)]
 #[command(author, version)]
@@ -14,11 +14,11 @@ pub struct Args {
 #[derive(Subcommand)]
 pub enum Cmd {
     #[command(subcommand)]
-    Analyse(Format),
+    Analyse(Type),
 }
 
 #[derive(Subcommand)]
-pub enum Format {
+pub enum Type {
     /// Performs sentiment analysis on provided HTML
     Html {
         #[arg(short, long)]
@@ -26,7 +26,7 @@ pub enum Format {
         path: String,
 
         #[arg(short, long)]
-        /// A selector for an HTML element containing text
+        /// A CSS selector for an HTML element containing text
         selector: String,
     },
     /// Performs sentiment analysis on provided text
@@ -41,11 +41,11 @@ impl Args {
     pub fn get_text(self) -> Result<String, ErrorKind> {
         match self.cmd {
             Cmd::Analyse(format) => match format {
-                Format::Text { path } => match import_from_file_path(&path) {
+                Type::Text { path } => match import_file_from_path(&path) {
                     Ok(text) => Ok(text),
                     Err(e) => Err(e),
                 },
-                Format::Html { path, selector } => {
+                Type::Html { path, selector } => {
                     if path.starts_with("http") {
                         let response = reqwest::blocking::get(&path)
                             .map_err(|e| ErrorKind::Request(path.clone(), e.to_string()))?;
@@ -58,10 +58,10 @@ impl Args {
                         let html = response
                             .text()
                             .map_err(|e| ErrorKind::Decode(e.to_string()))?;
-                        parse_html(&html, &selector)
+                        extract_text_from_html(&html, &selector)
                     } else {
-                        match import_from_file_path(&path) {
-                            Ok(html) => parse_html(&html, &selector),
+                        match import_file_from_path(&path) {
+                            Ok(html) => extract_text_from_html(&html, &selector),
                             Err(e) => Err(e),
                         }
                     }

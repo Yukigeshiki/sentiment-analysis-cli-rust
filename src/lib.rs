@@ -4,7 +4,7 @@ use scraper::{Html, Selector};
 
 pub mod args;
 
-fn parse_html(html: &str, selector: &str) -> Result<String, ErrorKind> {
+fn extract_text_from_html(html: &str, selector: &str) -> Result<String, ErrorKind> {
     let document = Html::parse_document(html);
     let selector = Selector::parse(selector).map_err(|e| ErrorKind::ParseHtml(e.to_string()))?;
     match document.select(&selector).next() {
@@ -15,7 +15,7 @@ fn parse_html(html: &str, selector: &str) -> Result<String, ErrorKind> {
     }
 }
 
-fn import_from_file_path(path: &str) -> Result<String, ErrorKind> {
+fn import_file_from_path(path: &str) -> Result<String, ErrorKind> {
     fs::read_to_string(path).map_err(|e| ErrorKind::ReadToString(e.to_string()))
 }
 
@@ -39,10 +39,10 @@ mod tests {
     use std::fs;
     use std::fs::File;
 
-    use crate::{import_from_file_path, parse_html};
+    use crate::{extract_text_from_html, import_file_from_path};
 
     #[test]
-    fn test_parse_html_is_success() {
+    fn test_extract_text_from_html_is_success() {
         let html = r#"
                 <html>
                     <body>
@@ -53,12 +53,12 @@ mod tests {
                 </html>
             "#;
         let selector = "div#example p";
-        let text = parse_html(html, selector).expect("Unable to parse HTML");
+        let text = extract_text_from_html(html, selector).expect("Unable to parse HTML");
         assert_eq!(text, "Hello, world!")
     }
 
     #[test]
-    fn test_parse_html_is_failure() {
+    fn test_extract_text_from_html_is_failure() {
         let html = r#"
                 <html>
                     <body>
@@ -69,7 +69,7 @@ mod tests {
                 </html>
             "#;
         let selector = "div#example a";
-        let e = parse_html(html, selector).unwrap_err();
+        let e = extract_text_from_html(html, selector).unwrap_err();
         assert_eq!(
             e.to_string(),
             "Error parsing HTML. No text available at selector"
@@ -77,17 +77,17 @@ mod tests {
     }
 
     #[test]
-    fn test_import_from_file_path_is_success() {
+    fn test_import_file_from_path_is_success() {
         let file_path = "foo.txt";
         File::create(file_path).expect("Error creating file for test");
-        let text = import_from_file_path(file_path).expect("Unable to import text in test");
+        let text = import_file_from_path(file_path).expect("Unable to import text in test");
         fs::remove_file(file_path).expect("Unable to remove file for test");
         assert_eq!(text, "")
     }
 
     #[test]
-    fn test_import_from_file_path_is_failure() {
-        let e = import_from_file_path("foo.txt").unwrap_err();
+    fn test_import_file_from_path_is_failure() {
+        let e = import_file_from_path("foo.txt").unwrap_err();
         assert_eq!(
             e.to_string(),
             "Error importing file from file system. No such file or directory (os error 2)"
