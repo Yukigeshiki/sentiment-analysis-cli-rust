@@ -2,41 +2,7 @@ use std::fs;
 
 use scraper::{Html, Selector};
 
-use args::*;
-
 pub mod args;
-
-pub fn get_text(args: Args) -> Result<String, ErrorKind> {
-    match args.cmd {
-        Cmd::Analyse(format) => match format {
-            Format::Text { path } => match import_from_file_path(&path) {
-                Ok(text) => Ok(text),
-                Err(e) => Err(e),
-            },
-            Format::Html { path, selector } => {
-                if path.starts_with("http") {
-                    let response = reqwest::blocking::get(&path)
-                        .map_err(|e| ErrorKind::Request(path.clone(), e.to_string()))?;
-                    if !response.status().is_success() {
-                        Err(ErrorKind::Request(
-                            path,
-                            format!("Request failed with code {}", response.status().as_u16()),
-                        ))?;
-                    }
-                    let html = response
-                        .text()
-                        .map_err(|e| ErrorKind::Decode(e.to_string()))?;
-                    parse_html(&html, &selector)
-                } else {
-                    match import_from_file_path(&path) {
-                        Ok(html) => parse_html(&html, &selector),
-                        Err(e) => Err(e),
-                    }
-                }
-            }
-        },
-    }
-}
 
 fn parse_html(html: &str, selector: &str) -> Result<String, ErrorKind> {
     let document = Html::parse_document(html);

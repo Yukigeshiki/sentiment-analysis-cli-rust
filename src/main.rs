@@ -2,13 +2,13 @@ use clap::Parser;
 use colored::Colorize;
 use comfy_table::{Cell, Color, Table};
 
-use sentiment::{args::Args, get_text};
+use sentiment::args::Args;
 
 fn main() {
     let args = Args::parse();
     let analyzer = vader_sentiment::SentimentIntensityAnalyzer::new();
 
-    match get_text(args) {
+    match args.get_text() {
         Ok(text) => {
             let analysed = analyzer.polarity_scores(&text);
             let mut table = Table::new();
