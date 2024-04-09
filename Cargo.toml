@@ -12,3 +12,5 @@ colored = "2.0.4"
 clap = { version = "4.4.13", features = ["derive"] }
 vader_sentiment = "0.1.1"
 comfy-table = "7.1.0"
+reqwest = {version = "0.12.3", features = ["blocking"]}
+scraper = "0.19.0"
