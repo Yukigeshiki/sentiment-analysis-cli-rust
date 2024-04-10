@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 
-use crate::{extract_text_from_html, import_file_from_path, ErrorKind};
+use crate::{extract_text_from_html, import_file_from_path, make_request, ErrorKind};
 
 #[derive(Parser)]
 #[command(author, version)]
@@ -41,29 +41,14 @@ impl Args {
     pub fn get_text(self) -> Result<String, ErrorKind> {
         match self.cmd {
             Cmd::Analyse(format) => match format {
-                Type::Text { path } => match import_file_from_path(&path) {
-                    Ok(text) => Ok(text),
-                    Err(e) => Err(e),
-                },
+                Type::Text { path } => import_file_from_path(&path),
                 Type::Html { path, selector } => {
                     if path.starts_with("http") {
-                        let response = reqwest::blocking::get(&path)
-                            .map_err(|e| ErrorKind::Request(path.clone(), e.to_string()))?;
-                        if !response.status().is_success() {
-                            Err(ErrorKind::Request(
-                                path,
-                                format!("Request failed with code {}", response.status().as_u16()),
-                            ))?;
-                        }
-                        let html = response
-                            .text()
-                            .map_err(|e| ErrorKind::Decode(e.to_string()))?;
+                        let html = make_request(path)?;
                         extract_text_from_html(&html, &selector)
                     } else {
-                        match import_file_from_path(&path) {
-                            Ok(html) => extract_text_from_html(&html, &selector),
-                            Err(e) => Err(e),
-                        }
+                        let html = import_file_from_path(&path)?;
+                        extract_text_from_html(&html, &selector)
                     }
                 }
             },

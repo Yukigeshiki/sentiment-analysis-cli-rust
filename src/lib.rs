@@ -4,6 +4,20 @@ use scraper::{Html, Selector};
 
 pub mod args;
 
+fn make_request(address: String) -> Result<String, ErrorKind> {
+    let response = reqwest::blocking::get(&address)
+        .map_err(|e| ErrorKind::Request(address.clone(), e.to_string()))?;
+    if !response.status().is_success() {
+        Err(ErrorKind::Request(
+            address,
+            format!("Request failed with code {}", response.status().as_u16()),
+        ))?;
+    }
+    response
+        .text()
+        .map_err(|e| ErrorKind::Decode(e.to_string()))
+}
+
 fn extract_text_from_html(html: &str, selector: &str) -> Result<String, ErrorKind> {
     let document = Html::parse_document(html);
     let selector = Selector::parse(selector).map_err(|e| ErrorKind::ParseHtml(e.to_string()))?;
