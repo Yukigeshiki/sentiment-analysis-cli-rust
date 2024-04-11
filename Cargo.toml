@@ -14,3 +14,7 @@ vader_sentiment = "0.1.1"
 comfy-table = "7.1.0"
 reqwest = {version = "0.12.3", features = ["blocking"]}
 scraper = "0.19.0"
+
+[dev-dependencies]
+wiremock = "0.6.0"
+tokio = { version = "1.32", features = ["macros"] }
