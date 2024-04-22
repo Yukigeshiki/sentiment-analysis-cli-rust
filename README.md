@@ -4,7 +4,7 @@
 
 A CLI tool to perform simple sentiment analysis written in Rust, using a Rust port of [VADER](https://github.com/ckw017/vader-sentiment-rust).
 
-Analysis can be performed on a text or an HTML file. For HTML, you can supply a path to a file locally, or you can scrape HTML from the web. Currently, a selector is used to specify the HTML element which contains the required text, but I hope to add xpath functionality in the future too.
+Analysis can be performed on a text file or text within an HTML file. For HTML, you can supply a path to a file locally, or you can scrape HTML from the web. Currently, a CSS selector is used to specify the HTML element which contains the required text, but I hope to add xpath functionality in the future too.
 
 ### How to run:
 
