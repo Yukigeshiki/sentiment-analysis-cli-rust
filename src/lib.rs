@@ -1,3 +1,4 @@
+use reqwest::header::USER_AGENT;
 use std::fs;
 
 use scraper::{Html, Selector};
@@ -20,7 +21,14 @@ fn import_file_from_path(path: &str) -> Result<String, ErrorKind> {
 }
 
 fn fetch_html_from_site(address: String) -> Result<String, ErrorKind> {
-    let response = reqwest::blocking::get(&address)
+    let client = reqwest::blocking::Client::new();
+    let response = client
+        .get(&address)
+        .header(
+            USER_AGENT,
+            "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+        )
+        .send()
         .map_err(|e| ErrorKind::Request(address.clone(), e.to_string()))?;
     if !response.status().is_success() {
         Err(ErrorKind::Request(
