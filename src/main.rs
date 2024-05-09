@@ -2,7 +2,9 @@ use clap::Parser;
 use colored::Colorize;
 use comfy_table::{Cell, Color, Table};
 
-use sentiment::args::Args;
+use crate::args::Args;
+
+mod args;
 
 fn main() {
     let args = Args::parse();
